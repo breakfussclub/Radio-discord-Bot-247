@@ -53,19 +53,22 @@ if not TOKEN:
         sys.exit(1)
     
     # Configure Gemini AI if available
-    if GEMINI_AVAILABLE and GEMINI_API_KEY:
-        genai.configure(api_key=GEMINI_API_KEY)
-        ai_model = genai.GenerativeModel('gemini-pro')
-    else:
-        ai_model = None
+  # Configure Gemini AI if available
+if GEMINI_AVAILABLE and GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+    ai_model = genai.GenerativeModel('gemini-pro')
+else:
+    ai_model = None
 
+# Load radio stations
+try:
     with open('./botconfig/radiostation.json', 'r') as f:
         radio_stations = json.load(f)
-        
 except FileNotFoundError as e:
-    logger.error(f"Configuration error: {e}")
-    print(f"Error: {e}. Make sure your 'botconfig' directory and all .json files are set up correctly.")
-    sys.exit()
+    logger.error(f"Radio station config missing: {e}")
+    print(f"❌ Error: {e}. Radio station list is required.")
+    sys.exit(1)
+
 
 # --- Database Handling ---
 def get_db():
