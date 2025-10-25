@@ -32,13 +32,25 @@ except ImportError:
     logger.warning("Gemini AI not available. Install 'google-generativeai' for AI features.")
 
 # --- Configuration Loading ---
-try:
-    with open('./botconfig/config.json', 'r') as f:
-        config = json.load(f)
-    TOKEN = config['token']
-    PREFIX = config['prefix']
-    OWNER_ID = int(config['ownerid'])
-    GEMINI_API_KEY = config.get('gemini_api_key', '')
+# Read from environment variables (Railway) first, fallback to config file
+TOKEN = os.getenv("TOKEN")
+PREFIX = os.getenv("PREFIX", "!")
+OWNER_ID = int(os.getenv("OWNER_ID", "0"))
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+
+# If TOKEN not in env, try config file
+if not TOKEN:
+    try:
+        with open("./botconfig/config.json", "r") as f:
+            config = json.load(f)
+            TOKEN = config["token"]
+            PREFIX = config["prefix"]
+            OWNER_ID = int(config["owner_id"])
+            GEMINI_API_KEY = config.get("gemini_api_key", "")
+    except FileNotFoundError as e:
+        logger.error(f"Configuration error: {e}")
+        print(f"❌ Error: {e}. Make sure TOKEN is set in environment variables.")
+        sys.exit(1)
     
     # Configure Gemini AI if available
     if GEMINI_AVAILABLE and GEMINI_API_KEY:
